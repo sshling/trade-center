@@ -71,12 +71,6 @@ public class HangqingSinaServiceImpl implements HangqingService {
         List<String> clearData = new ArrayList<>();
 
         for (String item : allData) {//单条股票数据
-            logger.info("遍历:"+item);
-            //item = StringUtils.remove(item, '\n');
-            if (StringUtils.isBlank(item)) {
-                logger.warn("空数据:"+item);
-                continue;
-            };
             if (!item.startsWith("var hq_str_s_sh000001")) {//不是大盘
                 //var hq_str_sh600000="xxx"
                 String itemNew = StringUtils.substringBetween(item, "\"", "\"");
