@@ -1,7 +1,12 @@
-{
-  "code":123457,
-  "up":11.2,
-  "upKeepTime":60,
-  "down":9.8,
-  "downKeepTime":60
-}
+[
+  {
+    "code":"002978",
+    "name":"华夏航空",
+    "up":0,
+    "upKeepTime":0,
+    "down":0,
+    "downKeepTime":0,
+    "b1Vol":100,
+    "s1Vol":0
+  }
+]
