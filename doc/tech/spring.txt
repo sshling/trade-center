@@ -1,0 +1,10 @@
+@EnableAutoConfiguration , tells Spring Boot to “guess” how you want to configure Spring, based on the jar dependencies
+
+spring-boot-starter-web added,Tomcat and Spring MVC,
+
+spring-boot-maven-plugin,可执行的jar,
+    $ java -jar target/myproject-0.0.1-SNAPSHOT.jar
+
+
+
+
