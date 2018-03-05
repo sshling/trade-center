@@ -6,5 +6,8 @@ spring-boot-maven-plugin,可执行的jar,
     $ java -jar target/myproject-0.0.1-SNAPSHOT.jar
 
 
+Quartz:
+http://www.opencodez.com/java/quartz-scheduler-with-spring-boot.htm
+
 
 

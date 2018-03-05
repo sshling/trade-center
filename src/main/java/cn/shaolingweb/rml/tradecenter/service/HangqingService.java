@@ -19,4 +19,6 @@ public interface HangqingService {
      * @return
      */
     public List<Hq> queryAll(List<String> code);
+
+    public void hi();
 }
