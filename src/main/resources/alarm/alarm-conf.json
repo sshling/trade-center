@@ -8,5 +8,15 @@
     "downKeepTime":0,
     "b1Vol":100,
     "s1Vol":0
+  },
+  {
+    "code":"000856",
+    "name":"冀东装备",
+    "up":0,
+    "upKeepTime":0,
+    "down":0,
+    "downKeepTime":0,
+    "b1Vol":100,
+    "s1Vol":0
   }
 ]

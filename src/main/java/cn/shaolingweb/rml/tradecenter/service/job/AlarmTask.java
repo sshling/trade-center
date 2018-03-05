@@ -1,6 +1,7 @@
 package cn.shaolingweb.rml.tradecenter.service.job;
 
 import cn.shaolingweb.rml.tradecenter.domain.QueryType;
+import cn.shaolingweb.rml.tradecenter.service.AlarmConfService;
 import cn.shaolingweb.rml.tradecenter.service.HangqingService;
 import cn.shaolingweb.rml.tradecenter.util.HttpUtil;
 import org.slf4j.Logger;
@@ -15,18 +16,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-public class MyTask {
+public class AlarmTask {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private HangqingService hangqingService;
 
-    @Scheduled(fixedRate = 5000)
-    public void hi(){
-        logger.info("hi ,jus a test");
-       // hangqingService.query("600000");
-        hangqingService.query("603901,300534");
+    @Scheduled(fixedRate = 60_000 * 3)//ms,3分钟重新加载一次
+    public void reloadConf() {
+        AlarmConfService.reload();
+    }
+
+    @Scheduled(fixedRate = 2000)
+    public void hi() {
+        List<String> codes = AlarmConfService.alarmConfMap.keySet().stream()
+                .collect(Collectors.toList());
+        hangqingService.query(codes);
 
 
     }

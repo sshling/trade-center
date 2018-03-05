@@ -8,17 +8,18 @@ public interface HangqingService {
 
     /**
      * 查询单个
+     *
      * @param code
      * @return
      */
-    public Hq query(String code);
+    public boolean query(List<String> code);
 
     /**
      * 批量查询
+     *
      * @param code
      * @return
      */
-    public List<Hq> queryAll(List<String> code);
+    public boolean queryAll(List<String> code);
 
-    public void hi();
 }

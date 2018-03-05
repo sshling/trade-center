@@ -27,32 +27,19 @@ public class HangqingSinaServiceImpl implements HangqingService {
     private AlarmSender alarmSender;
 
     @Override
-    public Hq query(String code) {
-        logger.debug("查询code:" + code);
-        String[] splitCodes = code.split(",");
-        List<Hq> result = HttpUtil.getAsObj(QueryType.GEGU, Arrays.asList(splitCodes));
-        int idx = 1;
+    public boolean query(List<String> codes) {
+        String responseStr = HttpUtil.getStr(QueryType.GEGU, codes);
+
+        List<Hq> result = repToObj(QueryType.GEGU, responseStr);
         for (Hq hq : result) {
-            idx++;
-            String msg = String.format("%s %s 当前价 %s", idx, hq.getName(), hq.getPriceCurrent());
-            logger.info(msg);
+            logger.info(hq.toString());
         }
-        try {
-            TimeUnit.SECONDS.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return true;
     }
 
     @Override
-    public List<Hq> queryAll(List<String> code) {
-        return null;
-    }
-
-    @Override
-    public void hi() {
-        logger.info("查询sina行情...");
+    public boolean queryAll(List<String> code) {
+        return true;
     }
 
     public static String getUrl(QueryType queryType, List<String> codes) {
@@ -79,25 +66,40 @@ public class HangqingSinaServiceImpl implements HangqingService {
      */
     public List<Hq> repToObj(QueryType queryType, String data) {
         List<Hq> result = new ArrayList<>();
+        data = StringUtils.removeAll(data, "\n");
         String[] allData = data.split(";");
         List<String> clearData = new ArrayList<>();
+
         for (String item : allData) {//单条股票数据
-            if (StringUtils.isBlank(item)) continue;
+            logger.info("遍历:"+item);
+            //item = StringUtils.remove(item, '\n');
+            if (StringUtils.isBlank(item)) {
+                logger.warn("空数据:"+item);
+                continue;
+            };
             if (!item.startsWith("var hq_str_s_sh000001")) {//不是大盘
                 //var hq_str_sh600000="xxx"
                 String itemNew = StringUtils.substringBetween(item, "\"", "\"");
-                clearData.add(itemNew);
+                if (StringUtils.isNoneBlank(itemNew)) {
+                    clearData.add(itemNew);
+                }else {
+                    logger.warn("查询异常:"+item);
+                }
             }
         }
 
         if (queryType.equals(QueryType.GEGU)) {
             //假设当前是请求一条的数据 TODO ,readonly
             Map<String, AlarmConf> map = AlarmConfService.alarmConfMap;
-            for (String clearDatum : clearData) {
-                String[] arr = clearDatum.split(",");
+            for (String item : clearData) {
+                String[] arr = item.split(",");
+                if (arr.length<20) {
+                    logger.error("异常数据:"+item);
+                    continue;
+                }
                 Hq hq = new Hq();
                 hq.setName(arr[0]);
-                hq.setCode(Integer.valueOf(arr[1]));
+                hq.setCode(arr[1]);
                 hq.setPriceCurrent(Double.valueOf(arr[3]));
                 hq.setPriceMax(Double.valueOf(arr[4]));
                 hq.setPriceMin(Double.valueOf(arr[5]));
@@ -116,10 +118,10 @@ public class HangqingSinaServiceImpl implements HangqingService {
                         alarmSender.alerm(hq, "当前卖1量<阀值,将开涨停");
                     }
 
-                    if (alarmConf.getUp()<hq.getPriceCurrent()) {//TODO 维持一定时间
+                    if (alarmConf.getUp() < hq.getPriceCurrent()) {//TODO 维持一定时间
                         alarmSender.alerm(hq, "现价>上界阈值");
                     }
-                    if (alarmConf.getDown()>hq.getPriceCurrent()) {
+                    if (alarmConf.getDown() > hq.getPriceCurrent()) {
                         alarmSender.alerm(hq, "现价<下界阈值");
                     }
                 }

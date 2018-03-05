@@ -1,7 +1,7 @@
 package cn.shaolingweb.rml.tradecenter.domain
 
 class AlarmConf {
-    var code: Int = 0
+    var code: String? = null
     var name: String? = null
     var up: Double = 0.toDouble()
     var down: Double = 0.toDouble()

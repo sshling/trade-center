@@ -18,11 +18,12 @@ fastjson
 
  */
 public class JsonUtil {
-    public void toObj(String jsonStr){
+    public void toObj(String jsonStr) {
 
     }
 
-    public static List<AlarmConf> toList(String jsonStr){
-        return JSON.parseObject(jsonStr, new TypeReference<ArrayList<AlarmConf>>(){});
+    public static List<AlarmConf> toList(String jsonStr) {
+        return JSON.parseObject(jsonStr, new TypeReference<ArrayList<AlarmConf>>() {
+        });
     }
 }
