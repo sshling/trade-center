@@ -1,22 +1,12 @@
 [
   {
-    "code":"002978",
-    "name":"华夏航空",
+    "code":"300525",
+    "name":"博思软件",
     "up":0,
     "upKeepTime":0,
     "down":0,
     "downKeepTime":0,
-    "b1Vol":100,
-    "s1Vol":0
-  },
-  {
-    "code":"000856",
-    "name":"冀东装备",
-    "up":0,
-    "upKeepTime":0,
-    "down":0,
-    "downKeepTime":0,
-    "b1Vol":100,
+    "b1Vol":1000,
     "s1Vol":0
   }
 ]

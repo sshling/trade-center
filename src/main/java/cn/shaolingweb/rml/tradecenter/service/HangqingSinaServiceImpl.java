@@ -7,15 +7,13 @@ import cn.shaolingweb.rml.tradecenter.util.HttpUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 通过新浪查询接口查询
@@ -23,13 +21,13 @@ import java.util.stream.Stream;
 @Service
 public class HangqingSinaServiceImpl implements HangqingService {
     private static Logger logger = LoggerFactory.getLogger(HangqingSinaServiceImpl.class);
-
+    @Autowired
     private AlarmSender alarmSender;
 
     @Override
     public boolean query(List<String> codes) {
         String responseStr = HttpUtil.getStr(QueryType.GEGU, codes);
-
+        Map<String, AlarmConf> allConf = AlarmConfService.alarmConfMap;
         List<Hq> result = repToObj(QueryType.GEGU, responseStr);
         for (Hq hq : result) {
             logger.info(hq.toString());
@@ -76,8 +74,8 @@ public class HangqingSinaServiceImpl implements HangqingService {
                 String itemNew = StringUtils.substringBetween(item, "\"", "\"");
                 if (StringUtils.isNoneBlank(itemNew)) {
                     clearData.add(itemNew);
-                }else {
-                    logger.warn("查询异常:"+item);
+                } else {
+                    logger.warn("查询异常:" + item);
                 }
             }
         }
@@ -86,38 +84,53 @@ public class HangqingSinaServiceImpl implements HangqingService {
             //假设当前是请求一条的数据 TODO ,readonly
             Map<String, AlarmConf> map = AlarmConfService.alarmConfMap;
             for (String item : clearData) {
+                /*
+                var hq_str_sz300525="博思软件,50.880,46.850,51.540,51.540,50.000,51.540,0.000,1459025,74744533.500,740775,51.540,8800,51.530,1100,51.500,6100,51.400,200,51.040,0,0.000,0,0.000,0,0.000,0,0.000,0,0.000,2018-03-29,11:05:03,00";
+
+                博思软件,50.880,46.850,51.540,51.540,50.000,51.540,0.000,1459025,74744533.500,740775,51.540,8800,51.530,1100,51.500,6100,51.400,200,51.040,0,0.000,0,0.000,0,0.000,0,0.000,0,0.000,2018-03-29,11:05:03,00
+                 */
                 String[] arr = item.split(",");
-                if (arr.length<20) {
-                    logger.error("异常数据:"+item);
+                if (arr.length < 20) {
+                    logger.error("异常数据:" + item);
                     continue;
                 }
                 Hq hq = new Hq();
                 hq.setName(arr[0]);
-                hq.setCode(arr[1]);
+                //hq.setCode(arr[1]);
                 hq.setPriceCurrent(Double.valueOf(arr[3]));
                 hq.setPriceMax(Double.valueOf(arr[4]));
                 hq.setPriceMin(Double.valueOf(arr[5]));
                 hq.setVolumeTraded(Long.valueOf(arr[8]));//TODO 除100 -->手数
-                hq.setB1Vol(Long.valueOf(arr[10]));
-                hq.setS1Vol(Long.valueOf(arr[20]));
+                Long b1 = Long.valueOf(arr[10]);
+                b1 = Long.valueOf(Math.round(b1 / 100));//买1,减少到手
+                hq.setB1Vol(b1);
+                Long s1 = Long.valueOf(arr[20]);
+                s1 = Long.valueOf(Math.round(s1 / 100));//卖1,减少到手
+                hq.setS1Vol(s1);//卖1
                 logger.info("行情-->" + hq.toString());
-                AlarmConf alarmConf = map.get(hq.getCode());
-                if (alarmConf != null) {
+                AlarmConf conf = map.get(hq.getName());
+                if (conf != null) {
+                    hq.setCode(conf.getCode());
                     //报警的买1量 > 当前的买1量
-                    if (alarmConf.getB1Vol() > hq.getB1Vol()) {
-                        alarmSender.alerm(hq, "当前买1量<阀值,将开跌停");
+                    if (conf.getB1Vol() != 0 && conf.getB1Vol() > hq.getB1Vol()) {
+                        String msg = String.format("当前买1量[%s]<阀值[%s],将打开涨停", hq.getB1Vol(), conf.getB1Vol());
+                        alarmSender.alerm(hq, msg);
+                    } else {
+                        logger.info("买1量[{}]在阀值[{}]之上.", hq.getB1Vol(), conf.getB1Vol());
                     }
                     //报警的卖1量 > 当前的卖1量
-                    if (alarmConf.getS1Vol() > hq.getS1Vol()) {
-                        alarmSender.alerm(hq, "当前卖1量<阀值,将开涨停");
+                    if (conf.getS1Vol() != 0 && conf.getS1Vol() > hq.getS1Vol()) {
+                        alarmSender.alerm(hq, "当前卖1量<阀值,将开跌停");
                     }
 
-                    if (alarmConf.getUp() < hq.getPriceCurrent()) {//TODO 维持一定时间
+                    if (conf.getUp() != 0 && conf.getUp() < hq.getPriceCurrent()) {//TODO 维持一定时间
                         alarmSender.alerm(hq, "现价>上界阈值");
                     }
-                    if (alarmConf.getDown() > hq.getPriceCurrent()) {
+                    if (conf.getDown() != 0 && conf.getDown() > hq.getPriceCurrent()) {
                         alarmSender.alerm(hq, "现价<下界阈值");
                     }
+                } else {
+                    logger.warn("未配置:" + hq.getCode() + ":" + hq.getName());
                 }
                 result.add(hq);
             }

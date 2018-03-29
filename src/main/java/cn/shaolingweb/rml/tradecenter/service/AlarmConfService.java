@@ -20,6 +20,7 @@ public class AlarmConfService {
     public static Logger logger = LoggerFactory.getLogger(AlarmConfService.class);
 
     private static List<AlarmConf> alarmConfs;
+    //key==股票代码,
     public static Map<String, AlarmConf> alarmConfMap = new ConcurrentHashMap<>();
 
     static {
@@ -43,7 +44,7 @@ public class AlarmConfService {
                 logger.error(msg);
                 throw new IllegalArgumentException(msg);
             }
-            alarmConfMap.put(alarmConf.getCode() + "", alarmConf);
+            alarmConfMap.put(alarmConf.getName() + "", alarmConf);
         }
     }
 }
