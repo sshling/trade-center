@@ -2,6 +2,7 @@ package cn.shaolingweb.rml.tradecenter.service;
 
 import cn.shaolingweb.rml.tradecenter.domain.AlarmConf;
 import cn.shaolingweb.rml.tradecenter.util.JsonUtil;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class AlarmConfService {
         String confStr = null;
         try {//读取配置文件的内容
             confStr = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
-            logger.info("conf:" + confStr);
+            logger.info("全部报警配置:" + confStr);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -51,12 +52,17 @@ public class AlarmConfService {
             if (upStr.endsWith("m")) {
                 String time = upStr.substring(0, upStr.length() - 2);
                 conf.setUpKeepTime(Integer.valueOf(time)*60);//转为秒
+            }else {
+                conf.setUpKeepTime(Integer.parseInt(upStr));
             }
             String downStr = conf.getDownKeepTimeStr();
             if (downStr.endsWith("m")){
                 String time = downStr.substring(0, downStr.length() - 2);
                 conf.setDownKeepTime(Integer.valueOf(time)*60);
+            }else {
+                conf.setDownKeepTime(Integer.parseInt(downStr));
             }
+            logger.info("代码[{}] 配置:{}",conf.getCode(), JSON.toJSONString(conf));
             alarmConfMap.put(conf.getCode(), conf);
         }
     }

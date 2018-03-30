@@ -67,14 +67,16 @@ public class HangqingSinaServiceImpl implements HangqingService {
         List<Hq> result = new ArrayList<>();
         data = StringUtils.removeAll(data, "\n");
         String[] allData = data.split(";");
-        List<String> clearData = new ArrayList<>();
-
+        Map<Integer, String> cleanData = new HashMap<>();
         for (String item : allData) {//单条股票数据
             if (!item.startsWith("var hq_str_s_sh000001")) {//不是大盘
                 //var hq_str_sh600000="xxx"
                 String itemNew = StringUtils.substringBetween(item, "\"", "\"");
+                //找code值
+                String codeTmp = item.split("=")[0];
+                String code = codeTmp.substring(codeTmp.length() - 6);
                 if (StringUtils.isNoneBlank(itemNew)) {
-                    clearData.add(itemNew);
+                    cleanData.put(Integer.valueOf(code), itemNew);
                 } else {
                     logger.warn("查询异常:" + item);
                 }
@@ -84,18 +86,16 @@ public class HangqingSinaServiceImpl implements HangqingService {
         if (queryType.equals(QueryType.GEGU)) {
             //假设当前是请求一条的数据 TODO ,readonly
             Map<Integer, AlarmConf> map = AlarmConfService.alarmConfMap;
-            for (String item : clearData) {
-                /*
-                var hq_str_sz300525="博思软件,50.880,46.850,51.540,51.540,50.000,51.540,0.000,1459025,74744533.500,740775,51.540,8800,51.530,1100,51.500,6100,51.400,200,51.040,0,0.000,0,0.000,0,0.000,0,0.000,0,0.000,2018-03-29,11:05:03,00";
-
-                博思软件,50.880,46.850,51.540,51.540,50.000,51.540,0.000,1459025,74744533.500,740775,51.540,8800,51.530,1100,51.500,6100,51.400,200,51.040,0,0.000,0,0.000,0,0.000,0,0.000,0,0.000,2018-03-29,11:05:03,00
-                 */
+            for (Map.Entry<Integer, String> entry : cleanData.entrySet()) {
+                Integer code=entry.getKey();
+                String item=entry.getValue();
                 String[] arr = item.split(",");
                 if (arr.length < 20) {
                     logger.error("异常数据:" + item);
                     continue;
                 }
                 Hq hq = new Hq();
+                hq.setCode(code);
                 hq.setName(arr[0]);
                 //hq.setCode(arr[1]);
                 hq.setPriceCurrent(Double.valueOf(arr[3]));
@@ -109,7 +109,7 @@ public class HangqingSinaServiceImpl implements HangqingService {
                 s1 = Long.valueOf(Math.round(s1 / 100));//卖1,减少到手
                 hq.setS1(s1);//卖1
                 logger.info("行情-->" + hq.toString());
-                AlarmConf conf = map.get(hq.getName());
+                AlarmConf conf = map.get(hq.getCode());
                 if (conf != null) {
                     hq.setCode(conf.getCode());
 
@@ -119,15 +119,20 @@ public class HangqingSinaServiceImpl implements HangqingService {
                     //上突:
                     if (conf.getUp() != 0 && conf.getUp() < hq.getPriceCurrent()) {
                         if (conf.getUpKeepTime() == 0) {
-                            alarmSender.alerm(hq, "现价>上界阈值,立即报警:突破");
+                            String msg = String.format("现价>上界阈值,立即报警:突破");
+                            alarmSender.alerm(hq, msg);
                             continue;
                         } else {//需要维持一段时间
                             if (!match.containsKey(hq.getCode())) {//首次
+                                String msg = String.format("现价>上界阈值,等待超时");
+                                logger.warn(msg);
                                 match.put(hq.getCode(), new Date());
                             } else {
                                 Date first = match.get(hq.getCode());
                                 if (AppDateUtils.timeOutSecond(first, conf.getUpKeepTime())) {
-                                    String msg = String.format("现价>上界阈值,超时[%s]:突破", conf.getUpKeepTimeStr());
+                                    String msg = String.format("现价>上界阈值,超时[%s from-to:%s - %s]:突破",
+                                            conf.getUpKeepTimeStr(),AppDateUtils.dateToStr(first)
+                                            ,AppDateUtils.dateToStr(new Date()));
                                     alarmSender.alerm(hq, msg);
                                     continue;
                                 }
@@ -143,6 +148,8 @@ public class HangqingSinaServiceImpl implements HangqingService {
                         } else {//需要维持一段时间
                             if (!match.containsKey(hq.getCode())) {//首次
                                 match.put(hq.getCode(), new Date());
+                                String msg = String.format("现价>下界阈值,等待超时");
+                                logger.warn(msg);
                             } else {
                                 Date first = match.get(hq.getCode());
                                 if (AppDateUtils.timeOutSecond(first, conf.getDownKeepTime())) {
@@ -174,7 +181,9 @@ public class HangqingSinaServiceImpl implements HangqingService {
             alarmSender.alerm(hq, msg);
             return true;
         } else {
-            logger.info("买1量[{}]在阀值[{}]之上.", hq.getB1(), conf.getB1Vol());
+            if (logger.isDebugEnabled()) {
+                logger.debug("买1量[{}]在阀值[{}]之上.", hq.getB1(), conf.getB1Vol());
+            }
         }
         //将打开跌停:报警的卖1量 > 当前的卖1量
         if (conf.getS1Vol() != 0 && conf.getS1Vol() > hq.getS1()

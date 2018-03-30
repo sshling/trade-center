@@ -31,8 +31,10 @@ public class AlarmTask {
     @Scheduled(fixedRate = 60_000 * 3)//ms,3分钟重新加载一次
     public void reloadConf() {
         if (!AppDateUtils.tradeTime()) {
+            logger.info("非交易时间 不重新加载配置!");
             return;
         }
+        logger.info("重新加载配置...");
         AlarmConfService.reload();
     }
 

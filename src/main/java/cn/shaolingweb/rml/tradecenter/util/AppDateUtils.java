@@ -16,6 +16,9 @@ public class AppDateUtils {
     public static final String FMT = "yyyy-MM-dd HH:mm:ss";
     public static final String FMT_HOUR_MIN = "HH:mm";
 
+    public static String dateToStr(Date date){
+        return new SimpleDateFormat(FMT).format(date);
+    }
     //计算之前某个时间到当前的时间,是否有足够的间隔
     //从上次到现在保持在30秒内
     public static boolean timeOutSecond(Date from, int interval) {
