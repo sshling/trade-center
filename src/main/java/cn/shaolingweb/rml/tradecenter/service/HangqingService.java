@@ -12,7 +12,7 @@ public interface HangqingService {
      * @param code
      * @return
      */
-    public boolean query(List<String> code);
+    public boolean query(List<Integer> code);
 
     /**
      * 批量查询
@@ -20,6 +20,6 @@ public interface HangqingService {
      * @param code
      * @return
      */
-    public boolean queryAll(List<String> code);
+    public boolean queryAll(List<Integer> code);
 
 }

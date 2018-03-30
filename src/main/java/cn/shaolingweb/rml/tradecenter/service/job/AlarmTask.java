@@ -47,7 +47,7 @@ public class AlarmTask {
         }
 
         if (!AlarmSenderImpl.SLEEP){
-            List<String> codes = AlarmConfService.alarmConfMap.entrySet().stream()
+            List<Integer> codes = AlarmConfService.alarmConfMap.entrySet().stream()
                     .map(entry->entry.getValue().getCode())
                     .collect(Collectors.toList());
             hangqingService.query(codes);

@@ -7,8 +7,15 @@ compile 'org.projectlombok:lombok:1.16.18'
 安装插件-->允许: Preferences... > Build, Execution, Deployment > Compiler > Annotation Processors
 类上使用注解 @Slf4j ,使用变量 log ,使用{} 占位符来拼接字符串
 
-错误:symbol:   variable log
-处理:
+    错误:symbol:   variable log
+    警告:LombokProcessor could not be initialized
+    处理: 使用JDK8,暂不支持更高版本的
 
-警告:LombokProcessor could not be initialized
 
+默认情况下，Spring Boot将日志输出到控制台，不会写到日志文件。
+
+使用Spring Boot喜欢在application.properties或application.yml配置，这样只能配置简单的场景，保存路径、日志格式等，复杂的场景（区分 info 和 error 的日志、每天产生一个日志文件等）满足不了，只能自定义配置，
+
+
+http://tengj.top/2017/04/05/springboot7/
+https://www.jianshu.com/p/f67c721eea1b

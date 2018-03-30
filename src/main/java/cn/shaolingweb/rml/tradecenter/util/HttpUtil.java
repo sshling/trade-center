@@ -92,7 +92,7 @@ public class HttpUtil {
         return str;
     }
 
-    public static String getStr(QueryType queryType, List<String> code) {
+    public static String getStr(QueryType queryType, List<Integer> code) {
         String queryUrl = HangqingSinaServiceImpl.getUrl(queryType, code);
         String rep = get(queryUrl);
         if (logger.isDebugEnabled()) {
