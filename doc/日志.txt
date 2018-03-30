@@ -1,0 +1,14 @@
+启动您的应用程序 --debug 标志来启用“调试”模式（开发的时候推荐开启）
+1. 在运行命令后加入--debug标志，如：$ java -jar springTest.jar --debug
+2. 在application.properties中配置debug=true，该属性置为true的时候，核心Logger（包含嵌入式容器、hibernate、spring）会输出更多内容，但是你自己应用的日志并不会输出为DEBUG级别。
+
+
+compile 'org.projectlombok:lombok:1.16.18'
+安装插件-->允许: Preferences... > Build, Execution, Deployment > Compiler > Annotation Processors
+类上使用注解 @Slf4j ,使用变量 log ,使用{} 占位符来拼接字符串
+
+错误:symbol:   variable log
+处理:
+
+警告:LombokProcessor could not be initialized
+

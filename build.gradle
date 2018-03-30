@@ -19,7 +19,7 @@ apply plugin: 'io.spring.dependency-management'
 
 group = 'cn.shaolingweb.rml'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = 9
+sourceCompatibility = 8
 
 repositories {
     mavenCentral()
@@ -27,10 +27,18 @@ repositories {
 
 
 dependencies {
+
+
     compile('org.springframework.boot:spring-boot-starter-aop')
     compile('org.springframework.boot:spring-boot-starter-quartz')
-
     compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+
+
+    provided 'org.projectlombok:lombok:1.16.18'
+
+
+
     compile('org.springframework.retry:spring-retry')
 /*
 compile('org.springframework.boot:spring-boot-starter-actuator')
@@ -72,6 +80,6 @@ compileTestKotlin {
 
  $ ./gradlew bootRun
 
-java -jar xx.war
+ java -jar xx.war
 
  */
