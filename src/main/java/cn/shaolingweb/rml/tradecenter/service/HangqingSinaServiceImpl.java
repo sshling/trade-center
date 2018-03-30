@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -23,7 +24,7 @@ public class HangqingSinaServiceImpl implements HangqingService {
     @Autowired
     private AlarmSender alarmSender;
     //key=code ,value=Date 第一次符合条件触发时间
-    private Map<Integer, Date> match = new HashMap<>();
+    private Map<Integer, Date> match = new ConcurrentHashMap<>();
 
     @Override
     public boolean query(List<Integer> codes) {
@@ -87,8 +88,8 @@ public class HangqingSinaServiceImpl implements HangqingService {
             //假设当前是请求一条的数据 TODO ,readonly
             Map<Integer, AlarmConf> map = AlarmConfService.alarmConfMap;
             for (Map.Entry<Integer, String> entry : cleanData.entrySet()) {
-                Integer code=entry.getKey();
-                String item=entry.getValue();
+                Integer code = entry.getKey();
+                String item = entry.getValue();
                 String[] arr = item.split(",");
                 if (arr.length < 20) {
                     logger.error("异常数据:" + item);
@@ -97,7 +98,6 @@ public class HangqingSinaServiceImpl implements HangqingService {
                 Hq hq = new Hq();
                 hq.setCode(code);
                 hq.setName(arr[0]);
-                //hq.setCode(arr[1]);
                 hq.setPriceCurrent(Double.valueOf(arr[3]));
                 hq.setPriceMax(Double.valueOf(arr[4]));
                 hq.setPriceMin(Double.valueOf(arr[5]));
@@ -117,47 +117,55 @@ public class HangqingSinaServiceImpl implements HangqingService {
                         continue;
                     }
                     //上突:
-                    if (conf.getUp() != 0 && conf.getUp() < hq.getPriceCurrent()) {
-                        if (conf.getUpKeepTime() == 0) {
-                            String msg = String.format("现价>上界阈值,立即报警:突破");
-                            alarmSender.alerm(hq, msg);
-                            continue;
-                        } else {//需要维持一段时间
-                            if (!match.containsKey(hq.getCode())) {//首次
-                                String msg = String.format("现价>上界阈值,等待超时");
-                                logger.warn(msg);
-                                match.put(hq.getCode(), new Date());
-                            } else {
-                                Date first = match.get(hq.getCode());
-                                if (AppDateUtils.timeOutSecond(first, conf.getUpKeepTime())) {
-                                    String msg = String.format("现价>上界阈值,超时[%s from-to:%s - %s]:突破",
-                                            conf.getUpKeepTimeStr(),AppDateUtils.dateToStr(first)
-                                            ,AppDateUtils.dateToStr(new Date()));
-                                    alarmSender.alerm(hq, msg);
-                                    continue;
-                                }
+                    if (conf.getUp() != 0) {
+                        if (conf.getUp() <= hq.getPriceCurrent()) {//大于等于阈值
+                            if (conf.getUpKeepTime() == 0) {
+                                String msg = String.format("现价>=上界阈值,立即报警:突破");
+                                alarmSender.alerm(hq, msg);
+                                continue;
+                            } else {//需要维持一段时间
+                                if (!match.containsKey(hq.getCode())) {//首次
+                                    String msg = String.format("现价>=上界阈值,等待超时");
+                                    logger.warn(msg);
+                                    match.put(hq.getCode(), new Date());
+                                } else {//注:若一运行就已经过了阈值,则很快就超时了,因为第一次计算时间较晚
+                                    Date first = match.get(hq.getCode());
+                                    if (AppDateUtils.timeOutSecond(first, conf.getUpKeepTime())) {
+                                        String msg = String.format("现价>=上界阈值,超时[%s from-to:%s - %s]:突破",
+                                                conf.getUpKeepTimeStr(), AppDateUtils.dateToStr(first)
+                                                , AppDateUtils.dateToStr(new Date()));
+                                        alarmSender.alerm(hq, msg);
+                                        continue;
+                                    }
 
+                                }
                             }
+                        } else {
+                            match.remove(conf.getCode());//若不符合了,要清理
                         }
                     }
                     //下破:
-                    if (conf.getDown() != 0 && conf.getDown() > hq.getPriceCurrent()) {
-                        if (conf.getDownKeepTime() == 0) {
-                            alarmSender.alerm(hq, "现价<下界阈值:下破");
-                            continue;
-                        } else {//需要维持一段时间
-                            if (!match.containsKey(hq.getCode())) {//首次
-                                match.put(hq.getCode(), new Date());
-                                String msg = String.format("现价>下界阈值,等待超时");
-                                logger.warn(msg);
-                            } else {
-                                Date first = match.get(hq.getCode());
-                                if (AppDateUtils.timeOutSecond(first, conf.getDownKeepTime())) {
-                                    String msg = String.format("现价<下界阈值,超时[%s]:下破", conf.getUpKeepTimeStr());
-                                    alarmSender.alerm(hq, msg);
-                                    continue;
+                    if (conf.getDown() != 0) {
+                        if (conf.getDown() >= hq.getPriceCurrent()) {//现价 小于等于 下界阈值
+                            if (conf.getDownKeepTime() == 0) {
+                                alarmSender.alerm(hq, "现价<=下界阈值:下破");
+                                continue;
+                            } else {//需要维持一段时间
+                                if (!match.containsKey(hq.getCode())) {//首次
+                                    match.put(hq.getCode(), new Date());
+                                    String msg = String.format("现价<=下界阈值,等待超时");
+                                    logger.warn(msg);
+                                } else {
+                                    Date first = match.get(hq.getCode());
+                                    if (AppDateUtils.timeOutSecond(first, conf.getDownKeepTime())) {
+                                        String msg = String.format("现价<=下界阈值,超时[%s]:下破", conf.getUpKeepTimeStr());
+                                        alarmSender.alerm(hq, msg);
+                                        continue;
+                                    }
                                 }
                             }
+                        } else {
+                            match.remove(conf.getCode());//若不符合了,要清理
                         }
                     }
                 } else {
@@ -169,6 +177,7 @@ public class HangqingSinaServiceImpl implements HangqingService {
         return result;
 
     }
+
     /*
     返回true ,表示已报警,无需向下判断
      */

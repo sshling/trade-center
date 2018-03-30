@@ -16,9 +16,11 @@ public class AppDateUtils {
     public static final String FMT = "yyyy-MM-dd HH:mm:ss";
     public static final String FMT_HOUR_MIN = "HH:mm";
 
-    public static String dateToStr(Date date){
+    private static final DateFormat fmt=new SimpleDateFormat(FMT);
+    public static String dateToStr(Date date) {
         return new SimpleDateFormat(FMT).format(date);
     }
+
     //计算之前某个时间到当前的时间,是否有足够的间隔
     //从上次到现在保持在30秒内
     public static boolean timeOutSecond(Date from, int interval) {
@@ -28,16 +30,25 @@ public class AppDateUtils {
         return cal.after(Calendar.getInstance());
     }
 
-    public static boolean timeOutSecond(Date from, int interval, Date to) {
+    /**
+     *  从from时间起,已经过去interval秒,返回true
+     * @param from
+     * @param interval
+     * @param base 基准时间,省略以当前时间计算
+     * @return
+     */
+    public static boolean timeOutSecond(Date from, int interval, Date base) {
         Calendar fromCal = Calendar.getInstance();
         fromCal.setTime(from);
         fromCal.add(Calendar.SECOND, interval);
-
+        System.out.println("1..."+fmt.format(fromCal.getTime())+" "+interval);
         Calendar toCal = Calendar.getInstance();
-        toCal.setTime(to);
-        return fromCal.after(toCal);
+        toCal.setTime(base);
+        System.out.println("2..."+fmt.format(toCal.getTime()));
+        return fromCal.before(toCal);
     }
-    public static boolean tradeTime(){
+
+    public static boolean tradeTime() {
         if (between("09:20", "11:30", "13:00", "15:00")) {
             return true;
         }
@@ -46,6 +57,7 @@ public class AppDateUtils {
         }
         return false;
     }
+
     //当前是否是在指定的时间内.交易时间:9:24~15:00 ,排除  11:30~13:00
     public static boolean between(String f1, String t1, String f2, String t2) {
         DateFormat df = new SimpleDateFormat(FMT_HOUR_MIN);
@@ -56,13 +68,9 @@ public class AppDateUtils {
             Date t1D = df.parse(t1);
             Date f2D = df.parse(f2);
             Date t2D = df.parse(t2);
-            boolean ff1 = now.after(f1D);//
-            boolean ff2 = now.before(t1D);//
-            boolean ff3 = now.after(f2D);//true
-            boolean ff4 = now.before(t2D);//
-            boolean ok1=now.after(f1D) && now.before(t1D);//上午盘
-            boolean ok2=now.after(f2D) && now.before(t2D);//下午盘
-            if (ok1|| ok2) {//盘中
+            boolean ok1 = now.after(f1D) && now.before(t1D);//上午盘
+            boolean ok2 = now.after(f2D) && now.before(t2D);//下午盘
+            if (ok1 || ok2) {//盘中
                 return true;
             }
         } catch (ParseException e) {
@@ -75,15 +83,5 @@ public class AppDateUtils {
     public static void main(String[] args) throws Exception {
         DateFormat df = new SimpleDateFormat(FMT);
         Date last = df.parse("2018-03-30 11:55:00");
-        df = new SimpleDateFormat(FMT_HOUR_MIN);
-        String nowStr = df.format(new Date());
-
-        if (tradeTime()) {
-            System.out.println(String.format("交易时间内:[%s]", nowStr));
-        }else {
-            System.err.println(String.format("交易时间外:[%s]", nowStr));
-        }
-
-
     }
 }
