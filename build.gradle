@@ -1,7 +1,7 @@
 buildscript {
     ext.kotlin_version = '1.2.30'
     ext {
-        springBootVersion = '2.0.0.RELEASE'
+        springBootVersion = '2.0.2.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -33,12 +33,8 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-quartz')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-thymeleaf')
-
-
-    provided 'org.projectlombok:lombok:1.16.18'
-
-
-
+    compile('org.springframework.boot:spring-boot-starter-data-elasticsearch')
+    compile 'org.projectlombok:lombok:1.16.20'
     compile('org.springframework.retry:spring-retry')
 /*
 compile('org.springframework.boot:spring-boot-starter-actuator')

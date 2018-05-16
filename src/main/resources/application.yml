@@ -1,1 +1,7 @@
 
+#ES
+spring:
+     data:
+        elasticsearch:
+            cluster-name: elasticsearch
+            cluster-nodes: ${server.es} #节点信息，逗号分隔，如果没有指定，则启动ClientNode
