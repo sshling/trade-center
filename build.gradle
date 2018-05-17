@@ -58,6 +58,8 @@ compile('org.springframework.boot:spring-boot-starter-actuator')
     compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.4'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'com.alibaba', name: 'fastjson', version: '1.2.46'
+    compile group: 'com.google.guava', name: 'guava', version: '25.0-jre'
+
 
 }
 compileKotlin {
