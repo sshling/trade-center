@@ -11,3 +11,7 @@ http://www.opencodez.com/java/quartz-scheduler-with-spring-boot.htm
 
 
 
+#spring profile 功能
+环境变量 spring.profiles.active
+<beans profile="prod">
+    SpringBoot默认会加载application.properties，如果环境变量中有spring.active.profile=dev，那么 SpringBoot 就会加载application-dev.properties；

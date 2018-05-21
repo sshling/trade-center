@@ -1,0 +1,34 @@
+
+
+compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-elasticsearch', version: '2.0.2.RELEASE'
+    ->spring-data-elasticsearch 3.0.7
+
+compile group: 'org.springframework.data', name: 'spring-data-elasticsearch', version: '3.0.7.RELEASE'
+    ->ES 5.5
+
+
+
+spring data elsaticsearch提供了三种构建查询模块的方式：
+1. 基本的增删改查：继承spring data提供的接口就默认提供
+2. 接口中声明方法：无需实现类，spring data根据方法名，自动生成实现类，方法名必须符合一定的规则（这里还扩展出一种忽略方法名，根据注解的方式查询）,样例参考：ArticleSearchRepository
+
+    接口只要继承 ElasticsearchRepository 类即可。默认会提供很多实现，比如 CRUD 和搜索相关的实现。类似于 JPA 读取数据，是使用 CrudRepository 进行操作 ES 数据。支持的默认方法有： count(), findAll(), findOne(ID), delete(ID), deleteAll(), exists(ID), save(DomainObject), save(Iterable)。
+
+
+    另外可以看出，接口的命名是遵循规范的。常用命名规则如下：
+    关键字     方法命名
+    And          findByNameAndPwd
+    Or             findByNameOrSex
+    Is              findById
+    Between   findByIdBetween
+    Like           findByNameLike
+    NotLike     findByNameNotLike
+    OrderBy    findByIdOrderByXDesc
+    Not           findByNameNot
+
+自定义repository：在实现类中注入elasticsearchTemplate，实现上面两种方式不易实现的查询（例如：聚合、分组、深度翻页等）
+
+
+
+
+
