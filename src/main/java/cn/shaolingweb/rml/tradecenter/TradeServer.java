@@ -8,13 +8,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication //
 @EnableAutoConfiguration//配置
-@EnableScheduling//调度
+//@EnableScheduling//调度
 @Slf4j
-public class TradeCenterApplication {
+public class TradeServer {
 
     public static void main(String[] args) {
         log.info("启动应用...");
-        SpringApplication.run(TradeCenterApplication.class, args);
+        SpringApplication.run(TradeServer.class, args);
         log.info("启动应用完成.");
     }
 }

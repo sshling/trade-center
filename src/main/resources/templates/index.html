@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>核心交易系统</title>
+</head>
+<body>
+<h1 th:text="${name}" />
+
+<br/>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>姓名</th>
+    </tr>
+    <tr th:each="u:${users}">
+        <td th:text="${u.id}">0</td>
+        <td th:text="${u.name}">zhansan</td>
+    </tr>
+</table>
+
+<br/>
+<select>
+    <option th:each="user:${users}" th:value="${user.id}" th:text="${user.name}">默认值</option>
+</select>
+<br/>
+
+</body>
+</html>
