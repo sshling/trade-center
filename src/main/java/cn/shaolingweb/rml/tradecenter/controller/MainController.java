@@ -27,7 +27,9 @@ public class MainController {
     }
 
     @RequestMapping("/{name}")
-    String name(@PathVariable String name, Model model) {//ModelAndView
+    //RequestParam,PathVariable
+    String name(@PathVariable String name, Model model) {
+        //ModelAndView,ThymeleafView,
         logger.info("请求参数[name={}]", name);
         model.addAttribute("name", name);
         User u1=new User();
