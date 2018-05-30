@@ -5,7 +5,7 @@ spring-boot-devtools来实现热部署（这里是热部署并非热加载注意
 需要关闭页面的缓存，这里我使用的是Thymeleaf配置在后面说明。
 
 https://docs.spring.io/spring-boot/docs/current/reference/html/howto-hotswapping.html
-
+https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-devtools.html
 
 gradle :
    Use auto-import
@@ -20,6 +20,6 @@ gradle :
 
 
 
-
-
+慕课网_《Spring Boot热部署》学习总结
+https://segmentfault.com/a/1190000012265072
 

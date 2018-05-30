@@ -1,35 +1,29 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html >
+<html xmlns:th="http://www.thymeleaf.org" layout:decorator="layout/layout">
 <head>
-    <meta charset="UTF-8">
-    <title>核心交易系统2</title>
+    <title>核心交易系统</title>
 </head>
 <body>
-<!--页面顶部-->
-<div th:replace="layout/header :: header"></div>
 
+<div layout:fragment="content">
+    <h1 th:text="${name}" />
 
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>姓名</th>
+        </tr>
+        <tr th:each="u:${users}">
+            <td th:text="${u.id}">0</td>
+            <td th:text="${u.name}">zhansan</td>
+        </tr>
+    </table>
 
-<h1 th:text="${name}" />
-<br/>
-<table>
-    <tr>
-        <th>ID</th>
-        <th>姓名</th>
-    </tr>
-    <tr th:each="u:${users}">
-        <td th:text="${u.id}">0</td>
-        <td th:text="${u.name}">zhansan</td>
-    </tr>
-</table>
+    <br/>
+    <select>
+        <option th:each="user:${users}" th:value="${user.id}" th:text="${user.name}">默认值</option>
+    </select>
+</div>
 
-<br/>
-<select>
-    <option th:each="user:${users}" th:value="${user.id}" th:text="${user.name}">默认值</option>
-</select>
-<br/>
-
-
-<div th:replace="layout/footer :: footer"></div>
 </body>
 </html>
