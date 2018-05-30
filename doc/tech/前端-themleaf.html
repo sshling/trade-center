@@ -1,0 +1,99 @@
+其它模板框架的缺点:如前后端分离做的不好,
+    thymeleaf，这个模板里的语法都是前端的语法.
+
+即使已经在model中添加了相应的属性，可是我们在模板上去写相应的表达式还是会报红色波浪线，就是错误的标志。
+虽然在后端的model数据中添加了，但是对于前端文件是无法感知的。因为这个时候并没有程序运行，也没有如此的智能。
+这里的问题并不大，主要问题在于要给html文件一个提示这个东西已经注入了就可以了[ alt+回车]
+
+方法一、在<!DOCTYPE html>下加上
+<!–suppress ThymeleafVariablesResolveInspection –>
+方法二、在<!DOCTYPE html>下加上
+<!–suppress ALL –>
+
+
+
+
+    <mvc:resources location="/static/" mapping="/static/**" />
+    <!-- 模板解析器  -->
+    <bean id="templateResolver" class="org.thymeleaf.templateresolver.ServletContextTemplateResolver">
+        <property name="prefix" value="/WEB-INF/templates/" />
+        <property name="suffix" value=".html" />
+        <property name="templateMode" value="HTML5" />
+        <property name="cacheable" value="false" />
+        <property name="characterEncoding" value="UTF-8"/>
+    </bean>
+
+    <bean id="templateEngine" class="org.thymeleaf.spring4.SpringTemplateEngine">
+        <property name="templateResolver" ref="templateResolver" />
+    </bean>
+
+    <bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="templateEngine" />
+        <property name="characterEncoding"  value="UTF-8" />
+    </bean>
+
+
+https://www.jetbrains.com/help/idea/2018.1/thymeleaf.html
+
+https://www.thymeleaf.org/doc/articles/layouts.html
+============ thymeleaf的layout常用的有两种方式用法  ==================
+https://tomoya92.github.io/2017/03/09/thymeleaf-layout/
+第一种
+将页面里的每个部分都分成 块 -> fragment 使用 th:include 和 th:replace 来引入页面
+这种用法没有layout的概念, 因为每个部分都是 fragment,
+
+    <body>
+        <div th:replace="components/header :: header">
+          <!-- 使用th:replace进来的header.html会替换下面的这个header -->
+          <header>
+            <ul>
+              <li>static - news</li>
+              <li>static - blog</li>
+              <li>static - post</li>
+            </ul>
+          </header>
+        </div>
+        <div class="container">
+          <h1>hello world</h1>
+        </div>
+        <div th:include="components/footer :: footer"></div>
+      </body>
+
+
+第二种
+写一个layout.html页面,当作页面的基础页面
+
+    <!-- layout/layout.html -->
+    <body>
+        <div th:include="components/header :: header"></div>
+        <div layout:fragment="content"></div>
+        <div th:include="components/footer :: footer"></div>
+    </body>
+
+在子页面里使用 layout:decorator 来将子页面里的内容加入到 layout.html里去
+
+    <!-- index.html -->
+    <html layout:decorator="layout/layout">
+    <head>...</head>
+    <body>
+    <div layout:fragment="content">
+        <h2>hello world!!!</h2>
+    </div>
+    </body>
+    </html>
+这样在layout.html里引入的css,js,imgs都可以在子页面里用了,而且在子页面里还可以引入子页面需要用到的css,js,imgs, 就很方便了 推荐
+
+
+模板传值
+    <header th:fragment="header (tab)">
+        <ul>
+            <li><span th:class="${tab eq 'news'} ? active">news</span></li>
+            <li><span th:class="${tab eq 'blog'} ? active">blog</span></li>
+            <li><span th:class="${tab eq 'post'} ? active">post</span></li>
+        </ul>
+    </header>
+
+    调用写法
+    <div th:include="components/header :: header(tab='blog')"></div>
+
+

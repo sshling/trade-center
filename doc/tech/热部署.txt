@@ -1,0 +1,25 @@
+@RestController == @Controller + @ResponseBody
+
+SpringBoot对于页面来说，已经实现了热加载，只是默认是关闭的，需要手动打开。
+spring-boot-devtools来实现热部署（这里是热部署并非热加载注意区别）
+需要关闭页面的缓存，这里我使用的是Thymeleaf配置在后面说明。
+
+https://docs.spring.io/spring-boot/docs/current/reference/html/howto-hotswapping.html
+
+
+gradle :
+   Use auto-import
+   Create directories for empty content roots automatically.
+
+启动:
+    gradle -> tasks->application:bootRun
+
+
+@对于项目部署到服务器上的。./gradlew bootRun &（&表示以进程后台方式运行，关闭当前session，不会停止运行。）
+@也可以将springboot项目打war包，然后（写部署脚本）部署到tomcat中。
+
+
+
+
+
+

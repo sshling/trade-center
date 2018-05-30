@@ -2,11 +2,15 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>核心交易系统</title>
+    <title>核心交易系统2</title>
 </head>
 <body>
-<h1 th:text="${name}" />
+<!--页面顶部-->
+<div th:replace="layout/header :: header"></div>
 
+
+
+<h1 th:text="${name}" />
 <br/>
 <table>
     <tr>
@@ -25,5 +29,7 @@
 </select>
 <br/>
 
+
+<div th:replace="layout/footer :: footer"></div>
 </body>
 </html>

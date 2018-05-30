@@ -23,20 +23,4 @@ public class Privilege {
     protected String creator;
     //创建时间'
     protected Timestamp createdTime;
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if(!(obj instanceof Privilege)) {
-            return false;
-        }
-        Privilege other = (Privilege)obj;
-        if (!code.equals(other.code)) {
-            return false;
-        }
-        return true;
-    }
 }
